@@ -183,8 +183,8 @@ void ListenSocketFactoryImpl::doFinalPreWorkerInit() {
   }
 
   ASSERT(!sockets_.empty());
-  auto listen_and_apply_options = [](Envoy::Network::SocketSharedPtr socket, int tcp_backlog_size) {    
-	  const auto rc = socket->ioHandle().listen(tcp_backlog_size);
+  auto listen_and_apply_options = [](Envoy::Network::SocketSharedPtr socket, int tcp_backlog_size) {
+    const auto rc = socket->ioHandle().listen(tcp_backlog_size);
     if (rc.return_value_ != 0) {
       throw EnvoyException(fmt::format("cannot listen() errno={}", rc.errno_));
     }
