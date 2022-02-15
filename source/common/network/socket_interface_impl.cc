@@ -72,10 +72,6 @@ IoHandlePtr SocketInterfaceImpl::socket(Socket::Type socket_type, Address::Type 
                  fmt::format("socket(2) failed, got error: {}", errorDetails(result.errno_)));
 
   //set socket unblocking
-  // const Api::SysCallSocketResult setunblock_result =
-  // Api::OsSysCallsSingleton::get().setsocketblocking(result.return_value_,false);
-  // RELEASE_ASSERT(SOCKET_VALID(setunblock_result.return_value_),
-            //  fmt::format("setsocketblocking (2) failed, got error: {}", errorDetails(setunblock_result.errno_)));
   IoHandlePtr io_handle = makeSocket(result.return_value_, socket_v6only, domain);
   const int rc = io_handle->setBlocking(false).return_value_;
   RELEASE_ASSERT(!SOCKET_FAILURE(rc), "");
