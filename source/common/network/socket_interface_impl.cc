@@ -33,7 +33,8 @@ IoHandlePtr SocketInterfaceImpl::socket(Socket::Type socket_type, Address::Type 
   ASSERT(!options.mptcp_enabled_, "MPTCP is only supported on Linux");
   int flags = 0;
 #else
-  int flags = SOCK_NONBLOCK;
+  // int flags = SOCK_NONBLOCK;
+  int flags = 0;
 
   if (options.mptcp_enabled_) {
     ASSERT(socket_type == Socket::Type::Stream);
@@ -69,8 +70,15 @@ IoHandlePtr SocketInterfaceImpl::socket(Socket::Type socket_type, Address::Type 
       Api::OsSysCallsSingleton::get().socket(domain, flags, protocol);
   RELEASE_ASSERT(SOCKET_VALID(result.return_value_),
                  fmt::format("socket(2) failed, got error: {}", errorDetails(result.errno_)));
-  IoHandlePtr io_handle = makeSocket(result.return_value_, socket_v6only, domain);
 
+  //set socket unblocking
+  // const Api::SysCallSocketResult setunblock_result =
+  // Api::OsSysCallsSingleton::get().setsocketblocking(result.return_value_,false);
+  // RELEASE_ASSERT(SOCKET_VALID(setunblock_result.return_value_),
+            //  fmt::format("setsocketblocking (2) failed, got error: {}", errorDetails(setunblock_result.errno_)));
+  IoHandlePtr io_handle = makeSocket(result.return_value_, socket_v6only, domain);
+  const int rc = io_handle->setBlocking(false).return_value_;
+  RELEASE_ASSERT(!SOCKET_FAILURE(rc), "");
 #if defined(__APPLE__) || defined(WIN32)
   // Cannot set SOCK_NONBLOCK as a ::socket flag.
   const int rc = io_handle->setBlocking(false).return_value_;

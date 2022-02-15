@@ -9,7 +9,8 @@
 namespace Envoy {
 namespace Api {
 
-class OsSysCallsImpl : public OsSysCalls {
+class OsSysCallsImpl : public OsSysCalls,
+                       public Logger::Loggable<Logger::Id::conn_handler>{
 public:
   // Api::OsSysCalls
   SysCallIntResult bind(os_fd_t sockfd, const sockaddr* addr, socklen_t addrlen) override;

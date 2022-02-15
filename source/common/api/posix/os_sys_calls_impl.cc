@@ -12,6 +12,7 @@ namespace Envoy {
 namespace Api {
 
 SysCallIntResult OsSysCallsImpl::bind(os_fd_t sockfd, const sockaddr* addr, socklen_t addrlen) {
+  ENVOY_LOG(info, " -----------------TCP socket bind is here--------------- ");
   const int rc = ::bind(sockfd, addr, addrlen);
   return {rc, rc != -1 ? 0 : errno};
 }
@@ -33,11 +34,13 @@ SysCallIntResult OsSysCallsImpl::close(os_fd_t fd) {
 }
 
 SysCallSizeResult OsSysCallsImpl::writev(os_fd_t fd, const iovec* iov, int num_iov) {
+  ENVOY_LOG(info, " -----------------TCP socket writev is here----------------");
   const ssize_t rc = ::writev(fd, iov, num_iov);
   return {rc, rc != -1 ? 0 : errno};
 }
 
 SysCallSizeResult OsSysCallsImpl::readv(os_fd_t fd, const iovec* iov, int num_iov) {
+  ENVOY_LOG(info, " -----------------TCP socket readv is here----------------");
   const ssize_t rc = ::readv(fd, iov, num_iov);
   return {rc, rc != -1 ? 0 : errno};
 }
@@ -234,6 +237,7 @@ SysCallIntResult OsSysCallsImpl::setsocketblocking(os_fd_t sockfd, bool blocking
 }
 
 SysCallIntResult OsSysCallsImpl::connect(os_fd_t sockfd, const sockaddr* addr, socklen_t addrlen) {
+  ENVOY_LOG(info, " -----------------TCP socket connect is here----------------");
   const int rc = ::connect(sockfd, addr, addrlen);
   return {rc, rc != -1 ? 0 : errno};
 }
@@ -249,6 +253,7 @@ SysCallIntResult OsSysCallsImpl::socketpair(int domain, int type, int protocol, 
 }
 
 SysCallIntResult OsSysCallsImpl::listen(os_fd_t sockfd, int backlog) {
+  ENVOY_LOG(info, " -----------------TCP socket listen is here, backlog is---------------- '{}'", backlog);
   const int rc = ::listen(sockfd, backlog);
   return {rc, rc != -1 ? 0 : errno};
 }
@@ -265,14 +270,14 @@ SysCallSocketResult OsSysCallsImpl::duplicate(os_fd_t oldfd) {
 
 SysCallSocketResult OsSysCallsImpl::accept(os_fd_t sockfd, sockaddr* addr, socklen_t* addrlen) {
   os_fd_t rc;
-
-#if defined(__linux__)
-  rc = ::accept4(sockfd, addr, addrlen, SOCK_NONBLOCK);
+  ENVOY_LOG(info, " -----------------TCP socket accept is here, sockfd is---------------- '{}'", sockfd);
+// #if defined(__linux__)
+  // rc = ::accept4(sockfd, addr, addrlen, SOCK_NONBLOCK);
   // If failed with EINVAL try without flags
-  if (rc >= 0 || errno != EINVAL) {
-    return {rc, rc != -1 ? 0 : errno};
-  }
-#endif
+  // if (rc >= 0 || errno != EINVAL) {
+    // return {rc, rc != -1 ? 0 : errno};
+  // }
+// #endif
 
   rc = ::accept(sockfd, addr, addrlen);
   if (rc >= 0) {
