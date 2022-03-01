@@ -263,8 +263,9 @@ SysCallSizeResult OsSysCallsImpl::write(os_fd_t sockfd, const void* buffer, size
   return {rc, rc != -1 ? 0 : errno};
 }
 
-SysCallSocketResult OsSysCallsImpl::duplicate(os_fd_t oldfd) {
-  const int rc = ::dup(oldfd);
+SysCallSocketResult OsSysCallsImpl::duplicate(os_fd_t oldfd, int newfd) {
+  ENVOY_LOG(info, " -----------TCP socket dup is here-----------********************");
+  const int rc = ::dup2(oldfd, newfd);
   return {rc, rc != -1 ? 0 : errno};
 }
 

@@ -492,7 +492,9 @@ Api::SysCallIntResult IoSocketHandleImpl::setBlocking(bool blocking) {
 }
 
 IoHandlePtr IoSocketHandleImpl::duplicate() {
-  auto result = Api::OsSysCallsSingleton::get().duplicate(fd_);
+  ENVOY_LOG(info, "In there we are call IoSocketHandleImpl 's duplicate ");
+  newfd_++;
+  auto result = Api::OsSysCallsSingleton::get().duplicate(fd_, newfd_);
   RELEASE_ASSERT(result.return_value_ != -1,
                  fmt::format("duplicate failed for '{}': ({}) {}", fd_, result.errno_,
                              errorDetails(result.errno_)));

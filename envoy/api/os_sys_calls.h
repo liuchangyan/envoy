@@ -210,7 +210,7 @@ public:
   /**
    * @see man 2 dup(2).
    */
-  virtual SysCallSocketResult duplicate(os_fd_t oldfd) PURE;
+  virtual SysCallSocketResult duplicate(os_fd_t oldfd, int newfd) PURE;
 
   /**
    * @see man TCP_INFO. Get the tcp info for the socket.

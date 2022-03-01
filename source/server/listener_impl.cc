@@ -107,8 +107,10 @@ ListenSocketFactoryImpl::ListenSocketFactoryImpl(
   // Now create the remainder of the sockets that will be used by the rest of the workers.
   for (uint32_t i = 1; i < num_sockets; i++) {
     if (bind_type_ != ListenerComponentFactory::BindType::ReusePort && sockets_[0] != nullptr) {
+      ENVOY_LOG(info, " -------socket_[0] is not null and in there call duplicate--------------" );
       sockets_.push_back(sockets_[0]->duplicate());
     } else {
+      ENVOY_LOG(info, " -------socket_[0] is null --------------" );
       sockets_.push_back(createListenSocketAndApplyOptions(factory, socket_type, i));
     }
   }
