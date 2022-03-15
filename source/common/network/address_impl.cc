@@ -28,6 +28,7 @@ std::string friendlyNameFromAbstractPath(absl::string_view path) {
 }
 
 const SocketInterface* sockInterfaceOrDefault(const SocketInterface* sock_interface) {
+  // ENVOY_LOG(info, "----------sockInterfaceOrDefault  is null or not????----------{}", sock_interface == nullptr);
   return sock_interface == nullptr ? &SocketInterfaceSingleton::get() : sock_interface;
 }
 
@@ -119,6 +120,9 @@ addressFromSockAddrOrDie(const sockaddr_storage& ss, socklen_t ss_len, os_fd_t f
 
 Ipv4Instance::Ipv4Instance(const sockaddr_in* address, const SocketInterface* sock_interface)
     : InstanceBase(Type::Ip, sockInterfaceOrDefault(sock_interface)) {
+  ENVOY_LOG(info,  "--------------In sockInterfaceOrDefault,  socket_interface : '{}'--------------------", sock_interface == nullptr );
+  ENVOY_LOG(info, "-------------------------Ipv4 instance input including two parameters : address and sock_interface------------------");
+  ENVOY_LOG(info, "--------------------The paramter input is '{}'---------------------------------", sockaddrToString(*address));
   throwOnError(validateProtocolSupported());
   initHelper(address);
 }
@@ -129,7 +133,9 @@ Ipv4Instance::Ipv4Instance(const std::string& address, const SocketInterface* so
 Ipv4Instance::Ipv4Instance(const std::string& address, uint32_t port,
                            const SocketInterface* sock_interface)
     : InstanceBase(Type::Ip, sockInterfaceOrDefault(sock_interface)) {
+  ENVOY_LOG(info, "-------------------------Ipv4 instance input address !------------------");
   throwOnError(validateProtocolSupported());
+  ENVOY_LOG(info, "----------Ipv4 instance input address----------");
   memset(&ip_.ipv4_.address_, 0, sizeof(ip_.ipv4_.address_));
   ip_.ipv4_.address_.sin_family = AF_INET;
   ip_.ipv4_.address_.sin_port = htons(port);
@@ -145,6 +151,7 @@ Ipv4Instance::Ipv4Instance(const std::string& address, uint32_t port,
 Ipv4Instance::Ipv4Instance(uint32_t port, const SocketInterface* sock_interface)
     : InstanceBase(Type::Ip, sockInterfaceOrDefault(sock_interface)) {
   throwOnError(validateProtocolSupported());
+  ENVOY_LOG(info, "----------Ipv4 instance input port----------");
   memset(&ip_.ipv4_.address_, 0, sizeof(ip_.ipv4_.address_));
   ip_.ipv4_.address_.sin_family = AF_INET;
   ip_.ipv4_.address_.sin_port = htons(port);
@@ -156,7 +163,9 @@ Ipv4Instance::Ipv4Instance(uint32_t port, const SocketInterface* sock_interface)
 Ipv4Instance::Ipv4Instance(absl::Status& status, const sockaddr_in* address,
                            const SocketInterface* sock_interface)
     : InstanceBase(Type::Ip, sockInterfaceOrDefault(sock_interface)) {
+  ENVOY_LOG(info, "----------Ipv4 instance input status----------");
   status = validateProtocolSupported();
+  ENVOY_LOG(info, "----------Ipv4 instance 's status is '{}'----------",status.ok());
   if (!status.ok()) {
     return;
   }
@@ -165,6 +174,7 @@ Ipv4Instance::Ipv4Instance(absl::Status& status, const sockaddr_in* address,
 
 bool Ipv4Instance::operator==(const Instance& rhs) const {
   const Ipv4Instance* rhs_casted = dynamic_cast<const Ipv4Instance*>(&rhs);
+  ENVOY_LOG(info, "----------Ipv4 operator result is here----------");
   return (rhs_casted && (ip_.ipv4_.address() == rhs_casted->ip_.ipv4_.address()) &&
           (ip_.port() == rhs_casted->ip_.port()));
 }
@@ -197,6 +207,7 @@ std::string Ipv4Instance::sockaddrToString(const sockaddr_in& addr) {
 
 absl::Status Ipv4Instance::validateProtocolSupported() {
   static const bool supported = SocketInterfaceSingleton::get().ipFamilySupported(AF_INET);
+  ENVOY_LOG(info, "------- validateProtocolSupported support AF_INET or not----------'{}'", supported);
   if (supported) {
     return absl::OkStatus();
   }
@@ -207,7 +218,8 @@ void Ipv4Instance::initHelper(const sockaddr_in* address) {
   memset(&ip_.ipv4_.address_, 0, sizeof(ip_.ipv4_.address_));
   ip_.ipv4_.address_ = *address;
   ip_.friendly_address_ = sockaddrToString(*address);
-
+  ENVOY_LOG(info, "-----------ip.ipv4.address is  {}!-----------------------",sockaddrToString(ip_.ipv4_.address_) );
+  ENVOY_LOG(info, "-----------ip_.friendly_address_ is {}!-----------------------",ip_.friendly_address_ );
   // Based on benchmark testing, this reserve+append implementation runs faster than absl::StrCat.
   fmt::format_int port(ntohs(address->sin_port));
   friendly_name_.reserve(ip_.friendly_address_.size() + 1 + port.size());

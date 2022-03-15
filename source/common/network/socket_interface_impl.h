@@ -7,7 +7,8 @@
 namespace Envoy {
 namespace Network {
 
-class SocketInterfaceImpl : public SocketInterfaceBase {
+class SocketInterfaceImpl : public SocketInterfaceBase,
+                            protected Logger::Loggable<Logger::Id::config>  {
 public:
   // SocketInterface
   IoHandlePtr socket(Socket::Type socket_type, Address::Type addr_type, Address::IpVersion version,

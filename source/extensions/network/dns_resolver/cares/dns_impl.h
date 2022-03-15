@@ -40,6 +40,7 @@ public:
 
 private:
   friend class DnsResolverImplPeer;
+  
   class PendingResolution : public ActiveDnsQuery {
   public:
     void cancel(CancelReason reason) override {
@@ -58,9 +59,8 @@ private:
   protected:
     // Network::ActiveDnsQuery
     PendingResolution(DnsResolverImpl& parent, ResolveCb callback, Event::Dispatcher& dispatcher,
-                      ares_channel channel, const std::string& dns_name)
-        : parent_(parent), callback_(callback), dispatcher_(dispatcher), channel_(channel),
-          dns_name_(dns_name) {}
+                      const std::string& dns_name)
+        : parent_(parent), callback_(callback), dispatcher_(dispatcher), dns_name_(dns_name) {}
 
     void finishResolve();
 
@@ -71,7 +71,7 @@ private:
     Event::Dispatcher& dispatcher_;
     // Was the query cancelled via cancel()?
     bool cancelled_ = false;
-    const ares_channel channel_;
+    // const ares_channel channel_;
     const std::string dns_name_;
     CancelReason cancel_reason_;
 
@@ -89,10 +89,11 @@ private:
     PendingResponse pending_response_{ResolutionStatus::Failure, {}};
   };
 
+ 
   class AddrInfoPendingResolution final : public PendingResolution {
   public:
     AddrInfoPendingResolution(DnsResolverImpl& parent, ResolveCb callback,
-                              Event::Dispatcher& dispatcher, ares_channel channel,
+                              Event::Dispatcher& dispatcher,
                               const std::string& dns_name, DnsLookupFamily dns_lookup_family);
 
     /**
@@ -101,15 +102,15 @@ private:
      * @param timeouts the number of times the request timed out.
      * @param addrinfo structure to store address info.
      */
-    void onAresGetAddrInfoCallback(int status, int timeouts, ares_addrinfo* addrinfo);
+    void GetAddrInfoCallback(int timeouts, const std::string& host_name);
 
     /**
      * wrapper function of call to ares_getaddrinfo.
      */
-    void startResolution();
+    void startResolution(const std::string& dns_name);
 
   private:
-    void startResolutionImpl(int family);
+    void startResolutionImpl(int family, const std::string& dns_name);
 
     // Holds the availability of non-loopback network interfaces for the system.
     struct AvailableInterfaces {
@@ -157,8 +158,8 @@ private:
 
   Event::Dispatcher& dispatcher_;
   Event::TimerPtr timer_;
-  ares_channel channel_;
-  bool dirty_channel_{};
+//   ares_channel channel_;
+//   bool dirty_channel_{};
   envoy::config::core::v3::DnsResolverOptions dns_resolver_options_;
 
   absl::node_hash_map<int, Event::FileEventPtr> events_;

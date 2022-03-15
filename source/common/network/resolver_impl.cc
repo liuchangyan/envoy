@@ -17,7 +17,8 @@ namespace Address {
 /**
  * Implementation of a resolver for IP addresses.
  */
-class IpResolver : public Resolver {
+class IpResolver : public Resolver,
+                   public Logger::Loggable<Logger::Id::conn_handler> {
 
 public:
   InstanceConstSharedPtr
@@ -26,6 +27,7 @@ public:
     case envoy::config::core::v3::SocketAddress::PortSpecifierCase::kPortValue:
     // Default to port 0 if no port value is specified.
     case envoy::config::core::v3::SocketAddress::PortSpecifierCase::PORT_SPECIFIER_NOT_SET:
+      ENVOY_LOG(info, "-----------PortSpecifierCase is calling here-----------------");
       return Network::Utility::parseInternetAddress(
           socket_address.address(), socket_address.port_value(), !socket_address.ipv4_compat());
     case envoy::config::core::v3::SocketAddress::PortSpecifierCase::kNamedPort:

@@ -9,7 +9,8 @@
 namespace Envoy {
 namespace Api {
 
-class OsSysCallsImpl : public OsSysCalls {
+class OsSysCallsImpl : public OsSysCalls, 
+	               public Logger::Loggable<Logger::Id::conn_handler> {
 public:
   // Api::OsSysCalls
   SysCallIntResult bind(os_fd_t sockfd, const sockaddr* addr, socklen_t addrlen) override;
@@ -47,7 +48,7 @@ public:
   SysCallIntResult socketpair(int domain, int type, int protocol, os_fd_t sv[2]) override;
   SysCallIntResult listen(os_fd_t sockfd, int backlog) override;
   SysCallSizeResult write(os_fd_t socket, const void* buffer, size_t length) override;
-  SysCallSocketResult duplicate(os_fd_t oldfd) override;
+  SysCallSocketResult duplicate(os_fd_t oldfd, int newfd) override;
   SysCallSocketResult accept(os_fd_t socket, sockaddr* addr, socklen_t* addrlen) override;
   SysCallBoolResult socketTcpInfo(os_fd_t sockfd, EnvoyTcpInfo* tcp_info) override;
   bool supportsGetifaddrs() const override;

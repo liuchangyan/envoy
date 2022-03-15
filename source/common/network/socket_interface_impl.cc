@@ -33,7 +33,8 @@ IoHandlePtr SocketInterfaceImpl::socket(Socket::Type socket_type, Address::Type 
   ASSERT(!options.mptcp_enabled_, "MPTCP is only supported on Linux");
   int flags = 0;
 #else
-  int flags = SOCK_NONBLOCK;
+  // int flags = SOCK_NONBLOCK;
+  int flags = 0;
 
   if (options.mptcp_enabled_) {
     ASSERT(socket_type == Socket::Type::Stream);
@@ -69,8 +70,11 @@ IoHandlePtr SocketInterfaceImpl::socket(Socket::Type socket_type, Address::Type 
       Api::OsSysCallsSingleton::get().socket(domain, flags, protocol);
   RELEASE_ASSERT(SOCKET_VALID(result.return_value_),
                  fmt::format("socket(2) failed, got error: {}", errorDetails(result.errno_)));
+  // IoHandlePtr io_handle = makeSocket(result.return_value_, socket_v6only, domain);
+  //set socket unblocking
   IoHandlePtr io_handle = makeSocket(result.return_value_, socket_v6only, domain);
-
+  const int rc = io_handle->setBlocking(false).return_value_;
+  RELEASE_ASSERT(!SOCKET_FAILURE(rc), "");
 #if defined(__APPLE__) || defined(WIN32)
   // Cannot set SOCK_NONBLOCK as a ::socket flag.
   const int rc = io_handle->setBlocking(false).return_value_;
@@ -88,7 +92,6 @@ IoHandlePtr SocketInterfaceImpl::socket(Socket::Type socket_type,
   if (addr->type() == Address::Type::Ip && ip_version == Address::IpVersion::v6) {
     v6only = addr->ip()->ipv6()->v6only();
   }
-
   IoHandlePtr io_handle =
       SocketInterfaceImpl::socket(socket_type, addr->type(), ip_version, v6only, options);
   if (addr->type() == Address::Type::Ip && ip_version == Address::IpVersion::v6) {

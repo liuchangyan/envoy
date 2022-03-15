@@ -88,7 +88,8 @@ public:
 /**
  * Implementation of an IPv4 address.
  */
-class Ipv4Instance : public InstanceBase {
+class Ipv4Instance : public InstanceBase,
+                     public Logger::Loggable<Logger::Id::conn_handler> {
 public:
   /**
    * Construct from an existing unix IPv4 socket address (IP v4 address and port).

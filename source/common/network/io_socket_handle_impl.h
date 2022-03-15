@@ -101,6 +101,7 @@ protected:
              : Api::IoErrorPtr(new IoSocketError(result.errno_), IoSocketError::deleteIoError)));
   }
 
+  int newfd_ = 101;
   os_fd_t fd_;
   int socket_v6only_{false};
   const absl::optional<int> domain_;

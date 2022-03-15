@@ -55,7 +55,8 @@ template <> struct NetworkSocketTrait<Socket::Type::Datagram> {
   static constexpr Socket::Type type = Socket::Type::Datagram;
 };
 
-template <typename T> class NetworkListenSocket : public ListenSocketImpl {
+template <typename T> class NetworkListenSocket : public ListenSocketImpl,
+                                                  public Logger::Loggable<Logger::Id::conn_handler> {
 public:
   NetworkListenSocket(const Address::InstanceConstSharedPtr& address,
                       const Network::Socket::OptionsSharedPtr& options, bool bind_to_port,
@@ -64,6 +65,7 @@ public:
                                       : nullptr,
                          address) {
     // Prebind is applied if the socket is bind to port.
+    ENVOY_LOG(info,"-------------------bind_to_port is '{}'------------------------", bind_to_port);
     if (bind_to_port) {
       RELEASE_ASSERT(io_handle_->isOpen(), "");
       setPrebindSocketOptions();
@@ -71,6 +73,7 @@ public:
     } else {
       // If the tcp listener does not bind to port, we test that the ip family is supported.
       if (auto ip = address->ip(); ip != nullptr) {
+        ENVOY_LOG(info,"--------------now come to ipFamilySupported---------");
         RELEASE_ASSERT(
             Network::SocketInterfaceSingleton::get().ipFamilySupported(ip->ipv4() ? AF_INET
                                                                                   : AF_INET6),

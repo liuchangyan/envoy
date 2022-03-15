@@ -20,7 +20,7 @@ struct SocketCreationOptions {
   }
 };
 
-class SocketInterface {
+class SocketInterface  {
 public:
   virtual ~SocketInterface() = default;
 
